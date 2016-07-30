@@ -2,10 +2,13 @@ import datetime
 import json
 import operator
 import urllib
-import urllib2
+from urllib.parse import urlencode
+# import urllib2
+import urllib.error
+import urllib.request
 import logging
 
-import exceptions
+from . import exceptions
 
 PINBOARD_API_ENDPOINT = "https://api.pinboard.in/v1/"
 PINBOARD_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -48,7 +51,7 @@ class Bookmark(object):
         return Pinboard(self.token)
 
     def __repr__(self):
-        parse_result = urllib2.urlparse.urlparse(self.url)
+        parse_result = urllib.urlparse.urlparse(self.url)
         return "<Bookmark description=\"{}\" url=\"{}\">".format(self.description.encode("utf-8"), parse_result.netloc)
 
     def save(self, update_time=False):
@@ -160,14 +163,15 @@ class PinboardCall(object):
         if 'meta' in params:
             params['meta'] = 1 if kwargs['meta'] else 0
 
-        query_string = urllib.urlencode(params)
+        query_string = urlencode(params)
         final_url = "{}?{}".format(url, query_string)
 
         try:
-            request = urllib2.Request(final_url)
-            opener = urllib2.build_opener(urllib2.HTTPSHandler)
+            print(final_url)
+            request = urllib.request.Request(final_url)
+            opener = urllib.request.build_opener(urllib.request.HTTPSHandler)
             response = opener.open(request)
-        except urllib2.HTTPError as e:
+        except urllib.error.HTTPError as e:
             error_mappings = {
                 401: exceptions.PinboardAuthenticationError,
                 403: exceptions.PinboardForbiddenError,
@@ -180,7 +184,9 @@ class PinboardCall(object):
             raise
         else:
             if parse_response:
-                json_response = json.load(response)
+                resp = response.read() #.decode('utf-8')
+                print(resp)
+                json_response = json.loads(resp)
 
                 for field in Pinboard.DATE_FIELDS:
                     if field in json_response:
