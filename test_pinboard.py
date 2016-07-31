@@ -55,13 +55,13 @@ class TestPinboardAPI(unittest.TestCase):
 
         self.pinboard = Pinboard(api_token)
 
-        response = self.pinboard.posts.recent(count=1, date=datetime.date.today())
-        bookmark = response['posts'][0]
+        response = self.pinboard.posts.recent(count=2, date=datetime.date.today())
+        bookmark = next(response['posts'])
         self.url = bookmark.url
 
     def bookmark(self):
         response = self.pinboard.posts.get(url=self.url, meta="yes")
-        return response['posts'][0]
+        return next(response['posts'])
 
     def retry_until_true(self, fun, msg=None, max_seconds=32):
         """
@@ -164,7 +164,7 @@ class TestPinboardAPI(unittest.TestCase):
         self.pinboard.posts.delete(url=url)
 
     def test_add_and_remove_bookmark_through_api(self):
-        random_suffix = "".join(random.choice(string.letters) for i in range (6))
+        random_suffix = "".join(random.choice(string.ascii_letters) for i in range (6))
         url = "http://example.com/{}".format(random_suffix)
 
         self._test_add_bookmark_through_api(url)

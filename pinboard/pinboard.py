@@ -167,7 +167,6 @@ class PinboardCall(object):
         final_url = "{}?{}".format(url, query_string)
 
         try:
-            print(final_url)
             request = urllib.request.Request(final_url)
             opener = urllib.request.build_opener(urllib.request.HTTPSHandler)
             response = opener.open(request)
@@ -184,8 +183,7 @@ class PinboardCall(object):
             raise
         else:
             if parse_response:
-                resp = response.read() #.decode('utf-8')
-                print(resp)
+                resp = response.read().decode('utf-8')
                 json_response = json.loads(resp)
 
                 for field in Pinboard.DATE_FIELDS:
